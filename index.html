@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>OK42 3D AR 模板</title>
+
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { width:100%; height:100vh; overflow:hidden; background:#f5f5f5; }
+
+    /* 顶部条 */
+    .top-bar { position:fixed; top:0; left:0; width:100%;
+      background:linear-gradient(135deg, rgba(102,126,234,0.5) 0%, rgba(118,75,162,0.5) 100%);
+      backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+      color:#F5F5F7; padding:12px 15px; display:flex;
+      align-items:center; justify-content:center; z-index:1000;
+      font-size:20px; font-weight:bold; white-space:nowrap;
+    }
+    .home-btn { position:absolute; left:15px; background:rgba(0,255,255,0.1);
+      color:#00ffff; width:42px; height:42px; border-radius:50%;
+      font-size:16px; font-weight:bold; border:2px solid #00ffff;
+      box-shadow:0 0 15px rgba(0,255,255,0.5); display:flex;
+      align-items:center; justify-content:center; text-decoration:none;
+      transition: all 0.3s; font-family:inherit; z-index:1001;
+    }
+    .home-btn:hover { box-shadow:0 0 25px rgba(0,255,255,0.8); transform:scale(1.1); }
+    .top-title { font-size:20px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#F5F5F7; }
+
+    /* 底部条 */
+    .bottom-bar { position:fixed; bottom:0; left:0; width:100%;
+      background:linear-gradient(135deg, rgba(102,126,234,0.5) 0%, rgba(118,75,162,0.5) 100%);
+      backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+      color:#F5F5F7; padding:12px 15px; text-align:center;
+      z-index:1000; font-size:14px; white-space:nowrap;
+      overflow:hidden; text-overflow:ellipsis;
+    }
+
+    /* 3D模型 */
+    model-viewer { width:100%; height:100vh; display:block; }
+
+    /* AR 按钮容器 */
+    #ar-button-wrapper { position:fixed; right:calc(20px + env(safe-area-inset-right));
+      bottom:calc(105px + env(safe-area-inset-bottom)); width:75px; height:75px; z-index:9999; pointer-events:auto; transition:opacity 0.4s ease;
+    }
+    #ar-button-glow { position:absolute; inset:0; border-radius:16px; animation:breathe 2.2s ease-in-out infinite;
+      box-shadow:0 0 18px rgba(102,126,234,0.9),0 0 36px rgba(102,126,234,0.7),0 0 72px rgba(102,126,234,0.45);
+    }
+    #ar-button { position:absolute; top:50%; left:50%; width:70px; height:70px; transform:translate(-50%,-50%);
+      background:url("poster/knife-poster.webp") no-repeat center / contain;
+      cursor:pointer; border:none; z-index:2;
+    }
+    @keyframes breathe {0% {transform:scale(1); opacity:0.6;} 50% {transform:scale(1.35); opacity:1;} 100% {transform:scale(1); opacity:0.6;} }
+    #ar-button-wrapper.hide { opacity:0; pointer-events:none; }
+
+    /* 加载进度条 */
+    .loading-container { position:fixed; top:0; left:0; width:100%; height:100vh; background:rgba(0,0,0,0.9);
+      display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:2000; opacity:1; transition:opacity 0.5s;
+    }
+    .loading-container.hide { opacity:0; pointer-events:none; }
+    .progress-bar { width:300px; height:6px; background:rgba(255,255,255,0.2); border-radius:3px; overflow:hidden; margin-top:20px; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,#667eea,#764ba2); width:0%; transition:width 0.3s; box-shadow:0 0 10px rgba(102,126,234,0.8); }
+    .loading-text { color:#F5F5F7; font-size:18px; font-weight:bold; }
+    .loading-percent { color:#667eea; font-size:32px; font-weight:bold; margin-top:10px; }
+
+    @media (max-width:480px){
+      .top-title{font-size:18px;}
+      .bottom-bar{font-size:12px;}
+      .home-btn{width:38px; height:38px; font-size:14px;}
+      #ar-button-wrapper{width:65px; height:65px; bottom:calc(95px + env(safe-area-inset-bottom));}
+      #ar-button{width:60px; height:60px;}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 加载进度 -->
+  <div class="loading-container" id="loadingContainer">
+    <div class="loading-text">Loading 3D Model</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="loading-percent" id="loadingPercent">0%</div>
+  </div>
+
+  <!-- 顶部条 -->
+  <div class="top-bar">
+    <a href="/" class="home-btn">42</a>
+    <span class="top-title">360° Interactive View</span>
+  </div>
+
+  <!-- 3D 模型 -->
+  <model-viewer
+    src="models/knife.glb"
+    ios-src="models/knife.usdz"
+    poster="poster/knife-poster.webp"
+    ar
+    ar-modes="scene-viewer webxr quick-look"
+    camera-controls
+    auto-rotate
+    shadow-intensity="1"
+    environment-image="neutral"
+    camera-orbit="0deg 90deg 80%"
+    field-of-view="30deg">
+  </model-viewer>
+
+  <!-- AR 按钮 -->
+  <div id="ar-button-wrapper">
+    <div id="ar-button-glow"></div>
+    <div id="ar-button"></div>
+  </div>
+
+  <!-- 底部条 -->
+  <div class="bottom-bar">
+    Interactive 3D: Drag to rotate, pinch to zoom for details.
+  </div>
+
+  <script src="js/viewer.js"></script>
+  <script>
+    const modelViewer = document.querySelector('model-viewer');
+    const loadingContainer = document.getElementById('loadingContainer');
+    const progressFill = document.getElementById('progressFill');
+    const loadingPercent = document.getElementById('loadingPercent');
+    const arButtonWrap = document.getElementById('ar-button-wrapper');
+    const arButton = document.getElementById('ar-button');
+
+    /* 点击 AR */
+    arButton.addEventListener('click',()=>{ if(modelViewer.activateAR){modelViewer.activateAR();} });
+
+    /* 隐藏/显示按钮 */
+    function hideARButton(){ arButtonWrap.classList.add('hide'); }
+    function showARButton(){ setTimeout(()=>{arButtonWrap.classList.remove('hide');},300);}
+    modelViewer.addEventListener('touchstart', hideARButton);
+    modelViewer.addEventListener('mousedown', hideARButton);
+    modelViewer.addEventListener('touchend', showARButton);
+    modelViewer.addEventListener('mouseup', showARButton);
+
+    /* 加载进度 */
+    modelViewer.addEventListener('progress',(e)=>{
+      const progress = e.detail.totalProgress*100;
+      progressFill.style.width=progress+'%';
+      loadingPercent.textContent=Math.round(progress)+'%';
+    });
+
+    /* 模型缩放动画 */
+    function easeInOutCubic(t){ return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2; }
+    function smoothZoom(startOrbit,endOrbit,startFOV,endFOV,duration,callback){
+      const startTime=Date.now();
+      const startDistance=parseFloat(startOrbit.split(' ')[2]);
+      const endDistance=parseFloat(endOrbit.split(' ')[2]);
+      const startFOVNum=parseFloat(startFOV);
+      const endFOVNum=parseFloat(endFOV);
+      const originalOrbit='0deg 90deg 80%';
+      const originalFOV='30deg';
+      function animate(){
+        const elapsed=Date.now()-startTime;
+        const progress=Math.min(elapsed/duration,1);
+        const eased=easeInOutCubic(progress);
+        const currentDistance=startDistance+(endDistance-startDistance)*eased;
+        const currentFOV=startFOVNum+(endFOVNum-startFOVNum)*eased;
+        modelViewer.cameraOrbit=`0deg 90deg ${currentDistance}%`;
+        modelViewer.fieldOfView=`${currentFOV}deg`;
+        if(progress<1){ requestAnimationFrame(animate); }
+        else if(callback){ callback(); }
+      }
+      animate();
+    }
+    function startZoomSequence(){
+      smoothZoom('0deg 90deg 80%','0deg 90deg 120%','30deg','45deg',2000,()=>{
+        smoothZoom('0deg 90deg 120%','0deg 90deg 35%','45deg','18deg',5000,()=>{
+          smoothZoom('0deg 90deg 35%','0deg 90deg 80%','18deg','30deg',2000,null);
+        });
+      });
+    }
+
+    modelViewer.addEventListener('load',()=>{
+      setTimeout(()=>{ loadingContainer.classList.add('hide'); setTimeout(()=>{ startZoomSequence(); },500); },500);
+    });
+  </script>
+</body>
+</html>
