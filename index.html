@@ -11,7 +11,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100vh;overflow:hidden;background:#f5f5f5}
 
-/* 顶部条 */
+/* 顶部导航条 */
 .top-bar{
   position:fixed;top:0;left:0;width:100%;
   background:linear-gradient(135deg,rgba(102,126,234,.5),rgba(118,75,162,.5));
@@ -29,7 +29,7 @@ html,body{width:100%;height:100vh;overflow:hidden;background:#f5f5f5}
   box-shadow:0 0 15px rgba(0,255,255,.6);
 }
 
-/* 底部条 */
+/* 底部操作提示 */
 .bottom-bar{
   position:fixed;bottom:0;left:0;width:100%;
   background:linear-gradient(135deg,rgba(102,126,234,.5),rgba(118,75,162,.5));
@@ -38,12 +38,12 @@ html,body{width:100%;height:100vh;overflow:hidden;background:#f5f5f5}
   z-index:1000;font-size:14px;
 }
 
-/* model-viewer */
+/* 3D 渲染容器：保持全屏显示 */
 model-viewer{
   width:100%;height:100vh;display:block;
 }
 
-/* AR按钮 */
+/* AR 按钮外层包裹 */
 #ar-button-wrapper{
   position:fixed;
   right:20px;
@@ -51,12 +51,14 @@ model-viewer{
   width:75px;height:75px;
   z-index:9999;
 }
+/* AR 按钮呼吸灯特效 */
 #ar-button-glow{
   position:absolute;inset:0;border-radius:16px;
   animation:breathe 2.2s infinite;
   box-shadow:0 0 20px rgba(102,126,234,.9),
              0 0 40px rgba(102,126,234,.7);
 }
+/* AR 按钮图标 */
 #ar-button{
   position:absolute;top:50%;left:50%;
   width:70px;height:70px;
@@ -70,7 +72,7 @@ model-viewer{
   100%{transform:scale(1);opacity:.6}
 }
 
-/* 加载层 */
+/* 全屏加载遮罩层 */
 .loading{
   position:fixed;inset:0;
   background:#000;
@@ -78,7 +80,7 @@ model-viewer{
   align-items:center;justify-content:center;
   z-index:2000;color:#fff;
 }
-.loading.hide{opacity:0;pointer-events:none}
+.loading.hide{opacity:0;pointer-events:none;transition: opacity 0.5s ease;}
 .bar{width:300px;height:6px;background:#333;margin-top:20px}
 .fill{height:100%;width:0;background:linear-gradient(90deg,#667eea,#764ba2)}
 </style>
@@ -107,8 +109,12 @@ model-viewer{
   auto-rotate
   environment-image="neutral"
   shadow-intensity="1"
-  camera-orbit="0deg 90deg 80%"
-  field-of-view="30deg">
+  
+  /* --- 自动化适配设置 --- */
+  camera-orbit="auto auto auto"      
+  field-of-view="auto"              
+  min-camera-orbit="auto auto 50%"  
+  bounds="tight">                   
 </model-viewer>
 
 <div id="ar-button-wrapper">
@@ -126,11 +132,15 @@ const loading=document.getElementById('loading');
 const fill=document.getElementById('fill');
 const arBtn=document.getElementById('ar-button');
 
+// 点击自定义按钮触发 AR 模式
 arBtn.onclick=()=>mv.activateAR&&mv.activateAR();
 
+// 监听加载进度
 mv.addEventListener('progress',e=>{
   fill.style.width=(e.detail.totalProgress*100)+'%';
 });
+
+// 加载完成后隐藏进度条
 mv.addEventListener('load',()=>{
   setTimeout(()=>loading.classList.add('hide'),500);
 });
