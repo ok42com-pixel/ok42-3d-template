@@ -17,6 +17,14 @@
 2\. 页面会自动加载默认 3D 模型。
 
 3\. 替换模型：
+在这个代码的地方改文件名
+<model-viewer
+  id="viewer"
+  src="models/B58-2-5.glb"
+  ios-src="models/B58-2-5.usdz"
+  poster="poster/B58UG.jpg.webp"
+  ar
+
 
 &nbsp;  - 上传新的 `.glb` 或 `.usdz` 文件到 `/models/`
 
@@ -33,6 +41,7 @@
 &nbsp;  - 修改页面里的 `src`、`poster` 对应新的模型  
 
 &nbsp;  - 这样仓库里就可以管理多个 3D 页面
+
 
 
 
